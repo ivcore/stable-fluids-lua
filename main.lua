@@ -9,7 +9,7 @@ http://www.dgp.toronto.edu/people/stam/reality/Research/pdf/GDC03.pdf
 ]]
 solver = require "solver"
 
-local N = 32
+local N = 64
 local N2 = N+2
 
 --Let the solver know what size the grid is
