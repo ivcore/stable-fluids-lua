@@ -1,6 +1,6 @@
---[[ 
-  This solver is based on the code from 'Real-time Fluid Dynamics for Games' by Jos Stam.
-  http://www.dgp.toronto.edu/people/stam/reality/Research/pdf/GDC03.pdf
+--[[
+This solver is based on the code from 'Real-time Fluid Dynamics for Games' by Jos Stam.
+http://www.dgp.toronto.edu/people/stam/reality/Research/pdf/GDC03.pdf
 ]]
 local solver = {}
 local N = 64
@@ -28,7 +28,7 @@ function set_bnd(N, b, x)
 		x[_0i]	= x[_1i] * sign
 		x[_N1i]	= x[_Ni] * sign
 
-		sign = 1 
+		sign = 1
 		if b == 2 then sign = -1 end
 		x[_i0]	= x[_i1] * sign
 		x[_iN1]	= x[_iN] * sign
@@ -45,9 +45,9 @@ function lin_solve(N, b, x, x0, a, c)
 
 	for k=1,20 do
 		for i = 1, N do
-			for j=1,N do 
+			for j=1,N do
 				x[i+N2*j] = ( x0[i+N2*j] + a * (x[(i-1)+N2*j] + x[(i+1)+N2*j]+x[i+N2*(j-1)] + x[i+N2*(j+1)]) ) / c;
-			end 
+			end
 		end
 		set_bnd ( N, b, x )
 	end
@@ -63,39 +63,39 @@ function advect (N, b, d, d0, u, v, dt )
 	local x, y, s0, t0, s1, t1, dt0;
 
 	dt0 = dt*N;
-	for i = 1, N  do 
-		for j = 1, N do 
-			x = i-dt0*u[i+N2*j]; 
+	for i = 1, N  do
+		for j = 1, N do
+			x = i-dt0*u[i+N2*j];
 			y = j-dt0*v[i+N2*j];
 
-			if x < 0.5 then 
+			if x < 0.5 then
 				x = 0.5
 			end
-			
+
 			if x > N+0.5 then
 				x = N+0.5
 			end
-			
+
 			i0 = x - x%1
 			i1 = i0+1;
-			
+
 			if y < 0.5 then
 				y = 0.5
 			end
 
 			if y > N+0.5 then
-				y = N+0.5 
+				y = N+0.5
 			end
-			
-			j0 = y - y%1 
+
+			j0 = y - y%1
 			j1 = j0+1
 			s1 = x-i0
-			s0 = 1-s1 
-			t1 = y-j0 
+			s0 = 1-s1
+			t1 = y-j0
 			t0 = 1-t1
-			d[i+N2*j] = s0 * ( t0 * d0[i0+N2*j0] + t1 * d0[i0+N2*j1] ) 
-					  + s1 * ( t0 * d0[i1+N2*j0] + t1 * d0[i1+N2*j1] )
-		end 
+			d[i+N2*j] = s0 * ( t0 * d0[i0+N2*j0] + t1 * d0[i0+N2*j1] )
+			+ s1 * ( t0 * d0[i1+N2*j0] + t1 * d0[i1+N2*j1] )
+		end
 	end
 	set_bnd ( N, b, d )
 end
@@ -103,19 +103,19 @@ end
 function project(N, u, v, p, div)
 	local i, j
 
-	for i = 1, N do 
-		for j=1,N do 
+	for i = 1, N do
+		for j=1,N do
 			div[i+N2*j] = -0.5*(u[(i+1)+N2*j]-u[(i-1)+N2*j]+v[i+N2*(j+1)]-v[i+N2*(j-1)])/N;
 			p[i+N2*j] = 0;
 		end
-	end	
+	end
 	set_bnd ( N, 0, div );
 	set_bnd ( N, 0, p );
 
 	lin_solve ( N, 0, p, div, 1, 4 );
 
-	for i = 1, N do 
-		for j=1,N do 
+	for i = 1, N do
+		for j=1,N do
 			local index = i+N2*j
 			u[index] = u[index] - 0.5*N*(p[(i+1)+N2*j]-p[(i-1)+N2*j]);
 			v[index] = v[index] - 0.5*N*(p[i+N2*(j+1)]-p[i+N2*(j-1)]);
@@ -129,7 +129,7 @@ function dens_step ( N, x, x0, u, v, diff, dt )
 	add_source ( N, x, x0, dt );
 	x0,x = x,x0
 	diffuse ( N, 0, x, x0, diff, dt );
-	
+
 	x0,x = x,x0
 	advect ( N, 0, x, x0, u, v, dt );
 end
@@ -140,14 +140,14 @@ function vel_step ( N, u, v, u0, v0, visc, dt )
 
 	u0,u = u,u0
 	diffuse ( N, 1, u, u0, visc, dt );
-	
+
 	v0,v = v,v0
 	diffuse ( N, 2, v, v0, visc, dt );
-	
+
 	project ( N, u, v, u0, v0 );
 	u0,u = u,u0
 	v0,v = v,v0
-	advect ( N, 1, u, u0, u0, v0, dt ); 
+	advect ( N, 1, u, u0, u0, v0, dt );
 	advect ( N, 2, v, v0, u0, v0, dt );
 	project ( N, u, v, u0, v0 );
 end

@@ -1,4 +1,5 @@
 function love.conf(t)
-	t.screen.width	= 512
-	t.screen.height	= 512
+	t.window.width	= 512
+	t.window.height	= 512
+	t.window.title = "Stable Fluids - click and drag!" 
 end
